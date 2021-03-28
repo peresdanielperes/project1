@@ -1,0 +1,10 @@
+.login-form{
+    background-color: rgb(239, 244, 247);
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+}
+
+.container{
+    padding: 50px;
+}
