@@ -1,3 +1,5 @@
+var reimbData = null;
+
 window.onload = async (e) => {
     e.preventDefault();
 
@@ -15,46 +17,12 @@ window.onload = async (e) => {
     });
 
     const data = await response.json();
-
-    //sort by id
-    const sortedById = data.sort((a,b) => {
-        if(a.id < b.id)
-            return -1;
-        if(a.id > b.id)
-            return 1;
-
-        return 0;
-    })
+    reimbData = data;
 
     //fill table
     let table = document.getElementById("reimb-table").getElementsByTagName('tbody')[0];
 
-    sortedById.forEach((element,index) => {
-        console.log(element.id, element.amount, element.description, element.author.username, element.type.value, element.status.value, element.dateSubmitted)
-        let row = table.insertRow();
-        row.classList.add("table-light");
-        let col1 = row.insertCell(0);
-        let col2 = row.insertCell(1);
-        let col3 = row.insertCell(2);
-        let col4 = row.insertCell(3);
-        let col5 = row.insertCell(4);
-        let col6 = row.insertCell(5);
-        let col7 = row.insertCell(6);
-        let col8 = row.insertCell(7);
-        let col9 = row.insertCell(8);
-
-        col1.innerHTML = "<b>" + element.id + "</b>";
-        col2.innerHTML = "$" +element.amount;
-        col3.innerHTML = element.description;
-        col4.innerHTML = element.type.value;
-        col5.innerHTML = getStatusForHTML(element.status.value, element.id);
-        col6.innerHTML = element.dateSubmitted;
-        col7.innerHTML = element.dateResolved;
-        col8.innerHTML = element.resolver.username;
-        if(element.receipt)
-            col9.innerHTML = `<i class="fas fa-file-pdf" id = "btn-receipt-${element.id}" onclick="downloadReceipt(event)"></i>`;
-
-    });
+    popRows(data, table)
     console.log(data);
 
 }
@@ -103,4 +71,34 @@ async function downloadReceipt(e){
     link.download = fileName;
     link.click();
 
+}
+
+function popRows(data, table){
+    data.forEach((element,index) => {
+        let row = table.insertRow();
+        row.classList.add("table-light");
+        let col1 = row.insertCell(0);
+        let col2 = row.insertCell(1);
+        let col3 = row.insertCell(2);
+        let col4 = row.insertCell(3);
+        let col5 = row.insertCell(4);
+        let col6 = row.insertCell(5);
+        let col7 = row.insertCell(6);
+        let col8 = row.insertCell(7);
+        let col9 = row.insertCell(8);
+
+        col1.innerHTML = "<b>" + element.id + "</b>";
+        col2.innerHTML = "$" +element.amount;
+        col3.innerHTML = element.description;
+        col4.innerHTML = element.type.value;
+        col5.innerHTML = getStatusForHTML(element.status.value, element.id);
+        col6.innerHTML = element.dateSubmitted;
+        col7.innerHTML = element.dateResolved;
+        col8.innerHTML = element.resolver.username;
+        if(element.receipt)
+            col9.innerHTML = `<i class="fas fa-file-pdf" id = "btn-receipt-${element.id}" onclick="downloadReceipt(event)"></i>`;
+
+
+        //tableBody.insertRow(row);
+    });
 }
