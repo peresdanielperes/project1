@@ -1,6 +1,5 @@
 package dao;
 
-
 import models.User;
 
 import java.util.List;
@@ -14,4 +13,6 @@ public interface UserDao {
     boolean createOne(User user);
     boolean deleteOneById(int userId);
     boolean deleteOneByUsername(String userId);
+
+    User getOneByEmail(String email);
 }

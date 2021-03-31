@@ -1,6 +1,5 @@
 package utilities;
 
-import models.Reimbursement;
 import models.User;
 
 import javax.mail.*;
@@ -18,8 +17,8 @@ public class AccountCreationEmail {
         properties.put("mail.smtp.host","smtp.gmail.com");
         properties.put("mail.smtp.port","587");
 
-        String myaccountEmail = "themadbastage@email.com";
-        String password = "Cndy229!";
+        String myaccountEmail = "themadbastage@gmail.com";
+        String password = "Cindy229!";
 
         Session session = Session.getInstance(properties, new Authenticator() {
             @Override
@@ -43,7 +42,7 @@ public class AccountCreationEmail {
             message.setSubject("Your account has been created!");
             message.setText("Username: " + user.getUsername() + "\n" +
                     "Password: " + Encryption.decrypt(user.getPassword()) + "\n" +
-                    "Location: http://localhost:9001/login"
+                    "Location: http://localhost:9001/"
             );
             return message;
         }catch(Exception ex){

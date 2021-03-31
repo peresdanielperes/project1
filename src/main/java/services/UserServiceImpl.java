@@ -3,6 +3,7 @@ package services;
 import dao.UserDao;
 import dao.UserDaoImpl;
 import models.User;
+import utilities.Encryption;
 
 import java.util.List;
 
@@ -83,10 +84,14 @@ public class UserServiceImpl implements UserService{
         //check if username exists in system
         User user = userDao.getOneByUsername(username);
         if(user == null) return null;
-        System.out.println(user);
-
-        if(!user.getPassword().equals(password)) return null;
+        String decryptedDBPassword = Encryption.decrypt(user.getPassword());
+        if(!decryptedDBPassword.equals(password)) return null;
 
         return user;
+    }
+
+    @Override
+    public User getOneByEmail(String email) {
+        return userDao.getOneByEmail(email);
     }
 }

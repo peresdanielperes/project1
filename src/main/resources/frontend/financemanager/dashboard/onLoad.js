@@ -49,9 +49,7 @@ window.onload = async (e) => {
                 <i class="far fa-times-circle" color="red" id = "denyBtn${element.id}" onclick = "denyReimb(event)"></i>
             </span>`
 
-            //col9.innerHTML = `<button type="button" class="btn btn-success" id = "approveBtn${element.id}" onclick = "approveReimb(event)">Approve</button>`;
-            //col10.innerHTML = `<button type="button" class="btn btn-danger" id = "denyBtn${element.id}" onclick = "denyReimb(event)">Deny</button>`;
-        }
+                    }
         if(element.receipt)
             col2.innerHTML = `<i class="fas fa-file-pdf" id = "btn-receipt-${element.id}" onclick="downloadReceipt(event)"></i>`;
 
@@ -64,7 +62,6 @@ window.onload = async (e) => {
         col8.innerHTML = element.dateSubmitted;
 
 
-        //tableBody.insertRow(row);
     });
 
 }
@@ -90,10 +87,6 @@ async function downloadReceipt(e){
 
 
 
-    //download file from byte array
-    //var sampleArr = base64ToArrayBuffer(reimbursement.receipt);
-    //saveByteArray("Sample Receipt", sampleArr);
-
 
     //convert string to binary string
     var binaryString = window.atob(reimbursement.receipt);
@@ -111,5 +104,4 @@ async function downloadReceipt(e){
     var fileName = `ReceiptID${reimbursement.id}`;
     link.download = fileName;
     link.click();
-
 }

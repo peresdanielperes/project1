@@ -16,4 +16,6 @@ public interface UserService {
     boolean deleteOneById(int userId);
     boolean deleteOneByUsername(String userId);
     User validateCredentials(String username, String password);
+
+    User getOneByEmail(String email);
 }

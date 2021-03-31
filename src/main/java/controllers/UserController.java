@@ -2,7 +2,6 @@ package controllers;
 
 import dao.ProductionConfig;
 import io.javalin.http.Context;
-import models.Token;
 import models.User;
 import models.UserRole;
 import services.UserService;
@@ -43,19 +42,24 @@ public class UserController {
     public void loginUser(Context ctx){
         String username = ctx.formParam("username");
         String password = ctx.formParam("password");
-        User res = userService.validateCredentials(username, Encryption.encrypt(password));
+        System.out.println(password);
+        System.out.println(Encryption.encrypt(password));
+        User res = userService.validateCredentials(username, password);
+        System.out.println(res);
         if(res != null){
             //give user token
             //String token = Encryption.encrypt(res.getUsername());
             //Token t = new Token(token,res.getRole().getId());
             ctx.sessionAttribute("killua",res);
+            ctx.sessionAttribute("feedback",null);
             if(res.getRole().getId() == 1) {
                 ctx.redirect("/employee/dashboard");
             }else if(res.getRole().getId() == 2){
                 ctx.redirect("/financemanager/dashboard");
             }
         }else {
-            ctx.json("invalid credentials");
+            ctx.sessionAttribute("feedback", "invalid credentials");
+            ctx.redirect("/");
         }
 
 
@@ -66,7 +70,7 @@ public class UserController {
      * */
     public void logout(Context ctx){
         ctx.sessionAttribute("killua",null);
-        ctx.redirect("/login");
+        ctx.redirect("/");
     };
 
     /**
@@ -100,16 +104,35 @@ public class UserController {
         User user = new User(username,encPassword,firstName,lastName,email,userRole);
 
         //check if username exists in db
-        User exists = userService.getOneByUsername(username);
-        if(exists != null) {
-            ctx.json("username exists");
-        }else{
+        User usernameExists = userService.getOneByUsername(username);
+        User emailExists = userService.getOneByEmail(email);
+        if(usernameExists != null) {
+            ctx.sessionAttribute("feedback","username already exists in the system");
+            ctx.redirect("/financemanager/create-employee");
+        }else if(emailExists != null){
+            ctx.sessionAttribute("feedback","email already exists in the system");
+            ctx.redirect("/financemanager/create-employee");
+        }
+        else{
             userService.createOne(user);
             AccountCreationEmail.sendMail(user);
 
             //ctx.json("user has been created");
-            ctx.redirect("/financemanager/dashboard");
+            ctx.sessionAttribute("feedback",null);
+            ctx.redirect("/financemanager/accounts");
         }
         //check if email exists in db
+    }
+
+    public void getFeedback(Context context) {
+
+        String val = context.sessionAttribute("feedback");
+
+        if(val==null){
+            context.json("null");
+        }else {
+            System.out.println(val);
+            context.json(val);
+        }
     }
 }

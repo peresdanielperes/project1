@@ -3,6 +3,7 @@ package models;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.File;
+import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.util.Date;
 

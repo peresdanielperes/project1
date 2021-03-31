@@ -21,7 +21,7 @@ public class FrontController {
             User user = context.sessionAttribute("killua");
             System.out.println("SESSION: " + user);
             if(user == null)
-                context.redirect("/login");
+                context.redirect("/");
             else if(user.getRole().getId() == 2)
                 context.redirect("/financemanager/dashboard");
         });
@@ -30,7 +30,7 @@ public class FrontController {
             User user = context.sessionAttribute("killua");
             System.out.println("SESSION: " + user);
             if(user == null)
-                context.redirect("/login");
+                context.redirect("/");
             else if(user.getRole().getId() == 1)
                 context.redirect("/employee/dashboard");
         });

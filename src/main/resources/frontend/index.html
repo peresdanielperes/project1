@@ -1,65 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="cache-control" content="max-age=0" />
-    <meta http-equiv="cache-control" content="no-cache" />
-    <meta http-equiv="expires" content="0" />
-    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
-    <meta http-equiv="pragma" content="no-cache" />
-    <title>Title</title>
+package controllers;
+
+import dao.ProductionConfig;
+import io.javalin.http.Context;
+import models.Reimbursement;
+import models.Type;
+import models.User;
+import services.ReimbursementService;
+import services.ReimbursementServiceImpl;
+import services.UserService;
+import services.UserServiceImpl;
+import utilities.ReimbursementStatusEmail;
+
+import javax.mail.MessagingException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+* controller for all reimbursements
+* */
+public class ReimbursementController {
+static ReimbursementService reimbursementService;
+static UserService userService;
+
+public ReimbursementController() {
+reimbursementService = new ReimbursementServiceImpl(ProductionConfig.url,ProductionConfig.username,ProductionConfig.password);
+userService = new UserServiceImpl(ProductionConfig.url,ProductionConfig.username,ProductionConfig.password);
+}
 
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@1,900&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-    <link rel="stylesheet" href="./global/style.css">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body class="body">
-<!-- nav bar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <!-- Container wrapper -->
-    <div class="container-fluid">
-        <!-- Navbar brand -->
-        <a class="navbar-brand" href="/">Reimbursement System</a>
+/**
+* get one reimbursement
+* */
+public void getOneReimbursement(Context ctx){
+ctx.json(reimbursementService.getOneById(Integer.parseInt(ctx.pathParam("id"))));
+};
 
-        <!-- Collapsible wrapper -->
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <!-- Left links -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!-- <li class="nav-item">
-                  <a class="nav-link" href="/employee/create-reimbursement/">Login</a>
-                </li> -->
-            </ul>
+/**
+* get all reimbursements from service
+* */
+public void getAllReimbursements(Context ctx){
+ctx.json(reimbursementService.getAll());
+};
 
-            <ul class="navbar-nav ml-auto">
-                <form action="/login">
-                    <button class="btn btn-primary" id="logout-btn">Login</button>
-                </form>
-            </ul>
-            <!-- Left links -->
-        </div>
-        <!-- Collapsible wrapper -->
-    </div>
-    <!-- Container wrapper -->
-</nav>
-
-<div class=" landing-container container">
-    <div class="landing-title">Reimbursement System </div>
-    <form action="/login">
-        <div class="d-grid gap-2">
-            <button class="btn btn-primary btn-login">Login</button>
-        </div>
-    </form>
-</div>
+/**
+* get all reimbursements given username
+* */
+public void getAllReimbursementsGivenUser(Context ctx){
+ctx.json(reimbursementService.getAllGivenUsername(ctx.pathParam("username")));
+};
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
+/**
+* approve reimbursements as manager
+* */
+public void approveReimbursement(Context ctx) throws MessagingException {
 
-</body>
-</html>
+int resId = Integer.parseInt(ctx.pathParam("resid"));
+int reimbId = Integer.parseInt(ctx.pathParam("reimbid"));
+
+ctx.json(reimbursementService.approveOne(reimbId,resId));
+
+Reimbursement reimbursement = reimbursementService.getOneById(reimbId);
+ReimbursementStatusEmail.sendMail(reimbursement);
+};
+
+/**
+* deny reimbursements as manager
+* */
+public void denyReimbursement(Context ctx) throws MessagingException {
+
+int resId = Integer.parseInt(ctx.pathParam("resid"));
+int reimbId = Integer.parseInt(ctx.pathParam("reimbid"));
+
+ctx.json(reimbursementService.denyOne(reimbId,resId));
+
+Reimbursement reimbursement = reimbursementService.getOneById(reimbId);
+ReimbursementStatusEmail.sendMail(reimbursement);
+};
+
+/**
+* create reimbursement as employee
+* */
+public void createReimbursement(Context ctx) throws IOException {
+String type = ctx.formParam("type");
+String uid = ctx.formParam("userid");
+String amount = ctx.formParam("amount");
+String description = ctx.formParam("description");
+System.out.println(ctx.formParamMap());
+InputStream is = ctx.uploadedFile("receiptfile").getContent();
+System.out.println(is);
+
+User user = ctx.sessionAttribute("killua");
+Type t = new Type(Integer.parseInt(type));
+
+Reimbursement reimbursement = new Reimbursement(Double.parseDouble(amount), description, user,t);
+
+ByteArrayOutputStream os = null;
+
+try {
+os = new ByteArrayOutputStream();
+
+byte[] buffer = new byte[1024];
+
+while (is.read(buffer) != -1) {
+os.write(buffer);
+}
+
+reimbursement.setReceipt(os.toByteArray());
+
+
+} catch (IOException e) {
+System.out.println("Could not upload file!");
+e.printStackTrace();
+} finally {
+if (is != null)
+is.close();
+if (os != null)
+os.close();
+}
+
+
+reimbursementService.createOne(reimbursement);
+
+System.out.println(ctx.headerMap());
+ctx.redirect("/employee/dashboard");
+};
+
+}

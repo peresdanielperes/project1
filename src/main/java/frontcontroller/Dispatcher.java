@@ -26,6 +26,9 @@ public class Dispatcher {
                         path("logout", () -> {
                             get(userController::logout);
                         });
+                        path("feedback", () -> {
+                            get(userController::getFeedback);
+                        });
                         path(":username", () -> {
                             get(userController::getOneUser);
                         });

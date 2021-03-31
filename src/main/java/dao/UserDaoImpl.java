@@ -240,4 +240,45 @@ public class UserDaoImpl implements UserDao{
 
         return false;
     }
+
+    @Override
+    public User getOneByEmail(String email) {
+        //my arrayList
+        User user = null;
+
+        try(Connection conn = DriverManager.getConnection(url, username, password)){
+
+            String sql = "SELECT u.ers_user_id, u.ers_username, u.ers_password, u.user_first_name, u.user_last_name, u.user_email, eur.ers_user_role_id ,eur.user_role\n" +
+                    "FROM ers_users u\n" +
+                    "INNER JOIN ers_user_roles eur ON eur.ers_user_role_id = u.user_role_id " +
+                    "WHERE user_email = ?;";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1,email);
+
+            ResultSet rs = ps.executeQuery(); //<----query not update
+
+            while(rs.next()){
+                UserRole role = new UserRole(
+                        rs.getInt(7),
+                        rs.getString(8)
+                );
+                user =
+                        new User(rs.getInt(1),
+                                rs.getString(2),
+                                rs.getString(3),
+                                rs.getString(4),
+                                rs.getString(5),
+                                rs.getString(6),
+                                role
+                        );
+            }
+
+        }catch(SQLException e){
+            e.printStackTrace();
+            loggy.error(e);
+        }
+
+        return user;
+    }
 }
